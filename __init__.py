@@ -1,5 +1,6 @@
-import bmesh
+import csv
 import bpy
+import bmesh
 from bpy.types import Panel
 from bpy.types import Operator
 from mathutils import Vector
@@ -19,6 +20,20 @@ bl_info = {
 
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
+
+# https://www.engineersedge.com/materials/densities_of_metals_and_elements_table_13976.htm
+with open('./density.csv', newline='') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    for row in spamreader:
+        designation, _, density, *_ = row
+        try:
+            density = float(density)
+        except:
+            (a, b) = density.split(' - ')
+            density = (float(a) + float(b)) / 2
+
+        finally:
+            print(f"{designation.upper(), designation, density}")
 
 
 def generate_report(method, ctx):
@@ -45,13 +60,18 @@ def generate_report(method, ctx):
         volume = area * ctx.scene.metrics_wall_thickness
 
     bm.free()
-    
+
     def format_length(x):
-        return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision = 4)
+        return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision=4)
+
     def format_area(x):
-        return bpy.utils.units.to_string('METRIC', 'AREA', x * F2, precision = 4)
+        return bpy.utils.units.to_string('METRIC', 'AREA', x * F2, precision=4)
+
     def format_volume(x):
         return bpy.utils.units.to_string('METRIC', 'VOLUME', x * F3, precision=4)
+
+    def format_mass(x):
+        return bpy.utils.units.to_string('METRIC', 'MASS', x, precision=4)
 
     return [
         f"Object: {o.name}",
@@ -63,6 +83,7 @@ def generate_report(method, ctx):
         f"    Z: {format_length(o.dimensions.z)}",
         f"Area: {format_area(area)}" if o.scale == v_unit_scale else None,
         f"Volume: {format_volume(volume)}" if o.scale == v_unit_scale else None,
+        f"Weight: {format_mass(float(ctx.scene.metrics_density) * volume)}",
     ]
 
 
@@ -71,7 +92,7 @@ class MTRX_OT_apply_scale_operator(Operator):
     bl_idname = "metrics.apply_scale"
     bl_label = "Apply object scale"
     bl_description = "Please apply Scale in order to get area an volume metrics"
-    
+
     @classmethod
     def poll(self, context):
         return context.object.scale != Vector((1, 1, 1))
@@ -97,9 +118,9 @@ class MTRX_OT_copy_operator(Operator):
         return context.mode == "OBJECT"
 
     def execute(self, context):
-        report = generate_report(context.scene.metrics_production_method, context)
+        report = generate_report(
+            context.scene.metrics_production_method, context)
         bpy.context.window_manager.clipboard = "\n".join(filter(None, report))
-
         self.report({'INFO'}, f"Metrics: Report has been copied to clipboard")
         return {'FINISHED'}
 
@@ -112,7 +133,8 @@ class MTRX_PT_sidebar(Panel):
     bl_category = "Item"
 
     def draw(self, context):
-        o_scale = context.object.scale == v_unit_scale
+        col = self.layout.column(align=True)
+        col.prop(context.scene, "metrics_density")
 
         col = self.layout.column(align=True)
         col.prop(context.scene, "metrics_production_method")
@@ -145,8 +167,25 @@ classes = [MTRX_OT_copy_operator,
            MTRX_PT_sidebar, ]
 
 
+extra_mats = (
+    ("None", 0),
+    ("Alu", 12.0),
+    ("Bronze", 11),
+    ("Neusilber", 5.5),
+)
+enum_items = [(str(v), f"{k} {v} kg/m³", f"specific weight of {k}: {v}kg/m³")
+              for (k, v) in extra_mats]
+
+
 def register():
     [bpy.utils.register_class(c) for c in classes]
+
+    bpy.types.Scene.metrics_density = bpy.props.EnumProperty(
+        name='Density',
+        description='A material and an associated specific weight',
+        default=None,
+        items=enum_items
+    )
 
     bpy.types.Scene.metrics_production_method = bpy.props.EnumProperty(
         name='Type',
@@ -171,6 +210,7 @@ def register():
 def unregister():
     [bpy.utils.unregister_class(c) for c in classes]
 
+    del bpy.types.Scene.metrics_density
     del bpy.types.Scene.metrics_production_method
     del bpy.types.Scene.metrics_wall_thickness
 
