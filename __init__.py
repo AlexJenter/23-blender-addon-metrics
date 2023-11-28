@@ -112,9 +112,7 @@ class MTRX_PT_sidebar(Panel):
     bl_category = "Item"
 
     def draw(self, context):
-        o_scale = context.object.scale == v_unit_scale
-
-        col = self.layout.column(align=True)
+        col = self.layout.column()
         col.prop(context.scene, "metrics_production_method")
 
         if (context.scene.metrics_production_method == 'WALLED'):
