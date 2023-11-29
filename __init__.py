@@ -46,6 +46,8 @@ def generate_report(method, ctx):
 
     bm.free()
 
+    mass = float(ctx.scene.metrics_density) * volume
+
     def format_length(x):
         return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision=4)
 
@@ -56,7 +58,7 @@ def generate_report(method, ctx):
         return bpy.utils.units.to_string('METRIC', 'VOLUME', x * F3, precision=4)
 
     def format_mass(x):
-        return bpy.utils.units.to_string('METRIC', 'MASS', x, precision=4)
+        return bpy.utils.units.to_string('METRIC', 'MASS', x * F3, precision=4)
 
     return [
         f"Object: {o.name}",
@@ -68,7 +70,7 @@ def generate_report(method, ctx):
         f"    Z: {format_length(o.dimensions.z)}",
         f"Area: {format_area(area)}" if o.scale == v_unit_scale else None,
         f"Volume: {format_volume(volume)}" if o.scale == v_unit_scale else None,
-        f"Weight: {format_mass((float(ctx.scene.metrics_density)*0.000001) * volume)}" if o.scale == v_unit_scale else None,
+        f"Weight: {format_mass(mass)}" if o.scale == v_unit_scale else None,
     ]
 
 
@@ -118,11 +120,11 @@ class MTRX_PT_sidebar(Panel):
     bl_category = "Item"
 
     def draw(self, context):
-        col = self.layout.column(align=True)
-        col.prop(context.scene, "metrics_density")
+        # col = self.layout.column(align=True)
 
         col = self.layout.column(align=True)
         col.prop(context.scene, "metrics_production_method")
+        col.prop(context.scene, "metrics_density")
 
         if (context.scene.metrics_production_method == 'WALLED'):
             col = self.layout.column(align=True)
@@ -158,9 +160,13 @@ with open('./density.csv', newline='') as csvfile:
     table_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     mat_items = []
     for row in list(table_reader)[1:]:
-        name, short_name, density, melting_point, comment, *_ = row
-        mat_items.append(
-            (str(density), f"{name} ({density} g/cm³)", f"{short_name:<2}\n{name}\n{comment}"))
+
+        name, short_name, density, melting_point, *comment = row
+        comment = " ".join(comment)
+
+        mat_items.append((density,
+                          name,
+                          f"[{short_name:<2}] {name}\nDichte: {density:>7}kg/m³\n\n{comment}"))
 
 
 def register():
