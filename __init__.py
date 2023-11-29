@@ -21,20 +21,6 @@ bl_info = {
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
 
-# https://www.engineersedge.com/materials/densities_of_metals_and_elements_table_13976.htm
-with open('./density.csv', newline='') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-    for row in spamreader:
-        designation, _, density, *_ = row
-        try:
-            density = float(density)
-        except:
-            (a, b) = density.split(' - ')
-            density = (float(a) + float(b)) / 2
-
-        finally:
-            print(f"{designation.upper(), designation, density}")
-
 
 def generate_report(method, ctx):
     SETTINGS = bpy.context.scene.unit_settings
@@ -42,8 +28,7 @@ def generate_report(method, ctx):
     LENGTH = SETTINGS.length_unit
     SCALE = SETTINGS.scale_length
 
-    F1 = bpy.utils.units.to_value(
-        SYSTEM, 'LENGTH', '1', str_ref_unit=LENGTH)  # / unit_scale
+    F1 = bpy.utils.units.to_value(SYSTEM, 'LENGTH', '1') * SCALE
     F2 = F1 * F1
     F3 = F2 * F1
 
@@ -83,7 +68,7 @@ def generate_report(method, ctx):
         f"    Z: {format_length(o.dimensions.z)}",
         f"Area: {format_area(area)}" if o.scale == v_unit_scale else None,
         f"Volume: {format_volume(volume)}" if o.scale == v_unit_scale else None,
-        f"Weight: {format_mass(float(ctx.scene.metrics_density) * volume)}",
+        f"Weight: {format_mass((float(ctx.scene.metrics_density)*0.000001) * volume)}" if o.scale == v_unit_scale else None,
     ]
 
 
@@ -167,14 +152,15 @@ classes = [MTRX_OT_copy_operator,
            MTRX_PT_sidebar, ]
 
 
-extra_mats = (
-    ("None", 0),
-    ("Alu", 12.0),
-    ("Bronze", 11),
-    ("Neusilber", 5.5),
-)
-enum_items = [(str(v), f"{k} {v} kg/m³", f"specific weight of {k}: {v}kg/m³")
-              for (k, v) in extra_mats]
+# https://www.scheideanstalt.de/metallglossar/metallglossar/
+
+with open('./density.csv', newline='') as csvfile:
+    table_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    mat_items = []
+    for row in list(table_reader)[1:]:
+        name, short_name, density, melting_point, comment, *_ = row
+        mat_items.append(
+            (str(density), f"{name} ({density} g/cm³)", f"{short_name:<2}\n{name}\n{comment}"))
 
 
 def register():
@@ -184,7 +170,7 @@ def register():
         name='Density',
         description='A material and an associated specific weight',
         default=None,
-        items=enum_items
+        items=mat_items
     )
 
     bpy.types.Scene.metrics_production_method = bpy.props.EnumProperty(
