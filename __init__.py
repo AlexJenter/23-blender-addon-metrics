@@ -161,13 +161,11 @@ with open('./density.csv', newline='') as csvfile:
     mat_items = []
     for row in list(table_reader)[1:]:
 
-        name, short_name, density, melting_point, *comment = row
-        comment = " ".join(comment)
+        name, short_name, density, melting_point, comment = row
 
         mat_items.append((density,
                           name,
                           f"[{short_name:<2}] {name}\nDichte: {density:>7}kg/m³\n\n{comment}"))
-
 
 def register():
     [bpy.utils.register_class(c) for c in classes]
