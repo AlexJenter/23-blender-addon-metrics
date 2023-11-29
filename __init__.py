@@ -1,6 +1,7 @@
 import csv
 import bpy
 import bmesh
+import os
 from bpy.types import Panel
 from bpy.types import Operator
 from mathutils import Vector
@@ -154,9 +155,9 @@ classes = [MTRX_OT_copy_operator,
            MTRX_PT_sidebar, ]
 
 
+csv_path = os.path.join(os.path.dirname(__file__), "density.csv")
 # https://www.scheideanstalt.de/metallglossar/metallglossar/
-
-with open('./density.csv', newline='') as csvfile:
+with open(csv_path, newline='') as csvfile:
     table_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     mat_items = []
     for row in list(table_reader)[1:]:
