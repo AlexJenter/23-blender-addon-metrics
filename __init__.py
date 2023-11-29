@@ -24,8 +24,10 @@ v_unit_scale = Vector((1.0, 1.0, 1.0))
 def generate_report(method, ctx):
     SETTINGS = bpy.context.scene.unit_settings
     SYSTEM = SETTINGS.system
+    LENGTH = SETTINGS.length_unit
+    SCALE = SETTINGS.scale_length
 
-    F1 = bpy.utils.units.to_value(SYSTEM, 'LENGTH', '1')
+    F1 = bpy.utils.units.to_value(SYSTEM, 'LENGTH', '1') * SCALE
     F2 = F1 * F1
     F3 = F2 * F1
 
