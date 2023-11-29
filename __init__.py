@@ -24,11 +24,8 @@ v_unit_scale = Vector((1.0, 1.0, 1.0))
 def generate_report(method, ctx):
     SETTINGS = bpy.context.scene.unit_settings
     SYSTEM = SETTINGS.system
-    LENGTH = SETTINGS.length_unit
-    SCALE = SETTINGS.scale_length
 
-    F1 = bpy.utils.units.to_value(
-        SYSTEM, 'LENGTH', '1', str_ref_unit=LENGTH)  # / unit_scale
+    F1 = bpy.utils.units.to_value(SYSTEM, 'LENGTH', '1')
     F2 = F1 * F1
     F3 = F2 * F1
 
@@ -45,11 +42,13 @@ def generate_report(method, ctx):
         volume = area * ctx.scene.metrics_wall_thickness
 
     bm.free()
-    
+
     def format_length(x):
-        return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision = 4)
+        return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision=4)
+
     def format_area(x):
-        return bpy.utils.units.to_string('METRIC', 'AREA', x * F2, precision = 4)
+        return bpy.utils.units.to_string('METRIC', 'AREA', x * F2, precision=4)
+
     def format_volume(x):
         return bpy.utils.units.to_string('METRIC', 'VOLUME', x * F3, precision=4)
 
@@ -71,7 +70,7 @@ class MTRX_OT_apply_scale_operator(Operator):
     bl_idname = "metrics.apply_scale"
     bl_label = "Apply object scale"
     bl_description = "Please apply Scale in order to get area an volume metrics"
-    
+
     @classmethod
     def poll(self, context):
         return context.object.scale != Vector((1, 1, 1))
@@ -97,7 +96,8 @@ class MTRX_OT_copy_operator(Operator):
         return context.mode == "OBJECT"
 
     def execute(self, context):
-        report = generate_report(context.scene.metrics_production_method, context)
+        report = generate_report(
+            context.scene.metrics_production_method, context)
         bpy.context.window_manager.clipboard = "\n".join(filter(None, report))
 
         self.report({'INFO'}, f"Metrics: Report has been copied to clipboard")
