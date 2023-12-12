@@ -2,8 +2,6 @@ import csv
 import bpy
 import bmesh
 import os
-from bpy.types import Panel
-from bpy.types import Operator
 from mathutils import Vector
 
 bl_info = {
@@ -75,7 +73,24 @@ def generate_report(method, ctx):
     ]
 
 
-class MTRX_OT_apply_scale_operator(Operator):
+class MTRX_OT_setup_unit_system(bpy.types.Operator):
+    """Helps setup Blender for working in Millimeters"""
+    bl_idname = "setup.change_unit_to_millimeters"
+    bl_label = "Setup Unit to MM"
+
+    def execute(self, context):
+        context.scene.unit_settings.length_unit = 'MILLIMETERS'
+        context.scene.unit_settings.scale_length = 0.001
+        for a in context.screen.areas:
+            if a.type == 'VIEW_3D':
+                context.space_data.overlay.grid_scale = 0.001
+                context.space_data.clip_start = 1
+                context.space_data.clip_end = 10_000
+
+        return {'FINISHED'}
+
+
+class MTRX_OT_apply_scale_operator(bpy.types.Operator):
     """Apply scale in order to calculate accurate surface area and volume"""
     bl_idname = "metrics.apply_scale"
     bl_label = "Apply object scale"
@@ -95,7 +110,7 @@ class MTRX_OT_apply_scale_operator(Operator):
         return {'FINISHED'}
 
 
-class MTRX_OT_copy_operator(Operator):
+class MTRX_OT_copy_operator(bpy.types.Operator):
     """Copy report to system clipboard"""
     bl_idname = "metrics.copy_to_clipboard"
     bl_label = "Copy report"
@@ -113,17 +128,24 @@ class MTRX_OT_copy_operator(Operator):
         return {'FINISHED'}
 
 
-class MTRX_PT_sidebar(Panel):
+class MTRX_PT_sidebar(bpy.types.Panel):
     """Display Producion Metrics"""
     bl_label = "Production Metrics"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Item"
 
+    @classmethod
+    def poll(cls, context):
+
+        return len(context.selectable_objects)
+
     def draw(self, context):
         # col = self.layout.column(align=True)
 
         col = self.layout.column(align=True)
+        col.operator("setup.change_unit_to_millimeters", icon="FIXED_SIZE")
+        col.separator()
         col.prop(context.scene, "metrics_production_method")
         col.separator()
         col.prop(context.scene, "metrics_density")
@@ -151,7 +173,8 @@ class MTRX_PT_sidebar(Panel):
                      icon='COPYDOWN')
 
 
-classes = [MTRX_OT_copy_operator,
+classes = [MTRX_OT_setup_unit_system,
+           MTRX_OT_copy_operator,
            MTRX_OT_apply_scale_operator,
            MTRX_PT_sidebar, ]
 
@@ -168,6 +191,7 @@ with open(csv_path, newline='') as csvfile:
         mat_items.append((density,
                           name,
                           f"[{short_name:<2}] {name}\nDichte: {density:>7}kg/m³\n\n{comment}"))
+
 
 def register():
     [bpy.utils.register_class(c) for c in classes]
