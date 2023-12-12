@@ -125,6 +125,7 @@ class MTRX_PT_sidebar(Panel):
 
         col = self.layout.column(align=True)
         col.prop(context.scene, "metrics_production_method")
+        col.separator()
         col.prop(context.scene, "metrics_density")
 
         if (context.scene.metrics_production_method == 'WALLED'):
