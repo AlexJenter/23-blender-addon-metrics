@@ -1,11 +1,12 @@
-from distutils import dir_util
 import bpy
 import csv
-import bmesh
 import os
+
 from mathutils import Vector
+
 from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .operators.apply_scale import MTRX_OT_apply_scale
+from .operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from .utils.generate_report import generate_report
 
 bl_info = {
@@ -24,23 +25,6 @@ bl_info = {
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
 
-
-class MTRX_OT_copy_operator(bpy.types.Operator):
-    """Copy report to system clipboard"""
-    bl_idname = "metrics.copy_to_clipboard"
-    bl_label = "Copy report"
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        return context.mode == "OBJECT"
-
-    def execute(self, context):
-        report = generate_report(
-            context.scene.metrics_production_method, context)
-        bpy.context.window_manager.clipboard = "\n".join(filter(None, report))
-        self.report({'INFO'}, f"Metrics: Report has been copied to clipboard")
-        return {'FINISHED'}
 
 
 class MTRX_PT_sidebar(bpy.types.Panel):
@@ -83,13 +67,13 @@ class MTRX_PT_sidebar(bpy.types.Panel):
                      text=MTRX_OT_apply_scale.bl_label,
                      icon='CON_SIZELIMIT')
 
-        col.operator(MTRX_OT_copy_operator.bl_idname,
-                     text=MTRX_OT_copy_operator.bl_label,
+        col.operator(MTRX_OT_copy_to_clipboard.bl_idname,
+                     text=MTRX_OT_copy_to_clipboard.bl_label,
                      icon='COPYDOWN')
 
 
 classes = [MTRX_OT_set_units_to_mm,
-           MTRX_OT_copy_operator,
+           MTRX_OT_copy_to_clipboard,
            MTRX_OT_apply_scale,
            MTRX_PT_sidebar, ]
 
