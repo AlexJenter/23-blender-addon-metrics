@@ -1,10 +1,10 @@
 import bpy
-import csv
 import os
 from .operators.apply_scale import MTRX_OT_apply_scale
 from .operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .panels.sidebar import MTRX_PT_sidebar
+from .utils.generate_material_enum_items import generate_material_enum_items
 
 bl_info = {
     "name": "Production Metrics",
@@ -29,18 +29,6 @@ classes = [
 
 
 csv_path = os.path.join(os.path.dirname(__file__), "data/density.csv")
-# https://www.scheideanstalt.de/metallglossar/metallglossar/
-with open(csv_path, newline='') as csvfile:
-    table_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-    mat_items = []
-    for row in list(table_reader)[1:]:
-
-        name, short_name, density, melting_point, comment = row
-
-        mat_items.append((density,
-                          name,
-                          f"[{short_name:<2}] {name}\nDichte: {density:>7}kg/m³\n\n{comment}"))
-
 
 def register():
     [bpy.utils.register_class(c) for c in classes]
@@ -49,7 +37,7 @@ def register():
         name='Density',
         description='A material and an associated specific weight',
         default=None,
-        items=mat_items
+        items=generate_material_enum_items(csv_path)
     )
 
     bpy.types.Scene.metrics_production_method = bpy.props.EnumProperty(
