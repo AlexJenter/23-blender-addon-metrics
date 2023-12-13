@@ -8,14 +8,15 @@ from .utils.generate_material_enum_items import generate_material_enum_items
 
 bl_info = {
     "name": "Production Metrics",
-    "description": "addon",
+    "description": "Find object metrics relevant for production",
     "author": "Alex Jenter",
     "version": (0, 0, 1),
     "blender": (4, 1, 0),
-    "location": "View3D",
-    "warning": "",
-    "support": "COMMUNITY",
-    "doc_url": "",
+    "location": "View3D > N Panel > Item",
+    "warning": "alpha, use at your own risk",
+    "support": "TESTING",
+    "doc_url": "https://github.com/AlexJenter/blender-addon-metrics",
+    "tracker_url": "https://github.com/AlexJenter/blender-addon-metrics/issues",
     "category": "3D View"
 }
 
