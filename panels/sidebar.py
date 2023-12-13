@@ -28,11 +28,11 @@ class MTRX_PT_sidebar(bpy.types.Panel):
             col = self.layout.column(align=True)
             col.prop(context.scene, "metrics_wall_thickness")
 
+        box = self.layout.box()
+        col = box.column(align=True)
         report = generate_report(
             context.scene.metrics_production_method, context)
 
-        box = self.layout.box()
-        col = box.column(align=True)
         [col.label(text=line) for line in report if line]
 
         col = self.layout.column(align=False)
