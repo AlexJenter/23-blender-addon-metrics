@@ -1,4 +1,5 @@
 import bpy
+from contextvars import Context
 from ..operators.apply_scale import MTRX_OT_apply_scale
 from ..operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from ..utils.generate_report import generate_report
@@ -12,10 +13,10 @@ class MTRX_PT_sidebar(bpy.types.Panel):
     bl_category = "Item"
 
     @classmethod
-    def poll(cls, context):
-        return len(context.selectable_objects)
+    def poll(cls, context: 'Context'):
+        return context.active_object is not None
 
-    def draw(self, context):
+    def draw(self, context: 'Context'):
         col = self.layout.column(align=True)
         col.operator("metrics.setup_mm", icon="FIXED_SIZE")
         col.separator()

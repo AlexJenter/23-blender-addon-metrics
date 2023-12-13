@@ -1,8 +1,9 @@
 import bpy
-import bmesh
 from mathutils import Vector
+from ..utils.bmesh_from_mesh import bmesh_from_mesh
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
+
 
 def generate_report(method, context):
     SETTINGS = bpy.context.scene.unit_settings
@@ -16,17 +17,12 @@ def generate_report(method, context):
 
     o = bpy.context.active_object
 
-    bm = bmesh.new()
-    bm.from_mesh(o.data)
-
-    area = sum(face.calc_area() for face in bm.faces)
-
-    if method == 'FULL':
-        volume = float(bm.calc_volume())
-    else:
-        volume = area * context.scene.metrics_wall_thickness
-
-    bm.free()
+    with bmesh_from_mesh(bpy.context.active_object) as bm:
+        area = sum(face.calc_area() for face in bm.faces)
+        if method == 'FULL':
+            volume = float(bm.calc_volume())
+        if method == 'WALLED':
+            volume = area * context.scene.metrics_wall_thickness
 
     mass = float(context.scene.metrics_density) * volume
 
