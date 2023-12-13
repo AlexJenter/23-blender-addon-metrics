@@ -1,11 +1,11 @@
 import bpy
 from mathutils import Vector
-from ..utils.bmesh_from_mesh import bmesh_from_mesh
+from .bmesh_from_object import bmesh_from_object
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
 
 
-def generate_report(method, context):
+def generate_report(method: bpy.types.EnumProperty, context: bpy.types.Context):
     SETTINGS = bpy.context.scene.unit_settings
     SYSTEM = SETTINGS.system
     LENGTH = SETTINGS.length_unit
@@ -17,7 +17,7 @@ def generate_report(method, context):
 
     o = bpy.context.active_object
 
-    with bmesh_from_mesh(bpy.context.active_object) as bm:
+    with bmesh_from_object(bpy.context.active_object) as bm:
         area = sum(face.calc_area() for face in bm.faces)
         if method == 'FULL':
             volume = float(bm.calc_volume())
