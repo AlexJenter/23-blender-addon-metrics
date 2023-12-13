@@ -1,6 +1,5 @@
 import bpy
 import os
-from .operators.apply_scale import MTRX_OT_apply_scale
 from .operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .panels.sidebar import MTRX_PT_sidebar
@@ -22,7 +21,6 @@ bl_info = {
 
 
 classes = [
-    MTRX_OT_apply_scale,
     MTRX_OT_copy_to_clipboard,
     MTRX_OT_set_units_to_mm,
     MTRX_PT_sidebar,

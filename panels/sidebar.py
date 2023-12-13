@@ -1,6 +1,5 @@
 import bpy
 from contextvars import Context
-from ..operators.apply_scale import MTRX_OT_apply_scale
 from ..operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from ..utils.generate_report import generate_report
 
@@ -36,11 +35,6 @@ class MTRX_PT_sidebar(bpy.types.Panel):
         [col.label(text=line) for line in report if line]
 
         col = self.layout.column(align=False)
-
-        col.operator(MTRX_OT_apply_scale.bl_idname,
-                     text=MTRX_OT_apply_scale.bl_label,
-                     icon='CON_SIZELIMIT')
-
         col.operator(MTRX_OT_copy_to_clipboard.bl_idname,
                      text=MTRX_OT_copy_to_clipboard.bl_label,
                      icon='COPYDOWN')
