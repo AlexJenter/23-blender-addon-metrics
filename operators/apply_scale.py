@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Vector
- 
+
+
 class MTRX_OT_apply_scale(bpy.types.Operator):
     """Apply scale in order to calculate accurate surface area and volume"""
     bl_idname = "metrics.apply_scale"

@@ -5,7 +5,6 @@ from .operators.apply_scale import MTRX_OT_apply_scale
 from .operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .panels.sidebar import MTRX_PT_sidebar
-from .utils.generate_report import generate_report
 
 bl_info = {
     "name": "Production Metrics",
@@ -29,7 +28,7 @@ classes = [
 ]
 
 
-csv_path = os.path.join(os.path.dirname(__file__), "density.csv")
+csv_path = os.path.join(os.path.dirname(__file__), "data/density.csv")
 # https://www.scheideanstalt.de/metallglossar/metallglossar/
 with open(csv_path, newline='') as csvfile:
     table_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
