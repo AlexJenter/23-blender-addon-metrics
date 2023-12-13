@@ -30,6 +30,7 @@ classes = [
 
 csv_path = os.path.join(os.path.dirname(__file__), "data/density.csv")
 
+
 def register():
     [bpy.utils.register_class(c) for c in classes]
 
@@ -44,8 +45,10 @@ def register():
         name='Type',
         description='Production method',
         default='FULL',
-        items=[('FULL', 'Full', ''),
-               ('WALLED', 'Walled', '')]
+        items=[
+            ('FULL', 'Full', 'Calculate the solid volume, use this mode when calculating concrete pours or similar'),
+            ('WALLED', 'Walled', 'Calculate the walled volume, use this as estimate when bronze casting with a certain thickness'),
+        ]
     )
 
     bpy.types.Scene.metrics_wall_thickness = bpy.props.FloatProperty(
@@ -57,12 +60,6 @@ def register():
         soft_max=6,
         min=0,
         max=30
-    )
-
-    bpy.types.Scene.metrics_report = bpy.props.StringProperty(
-        name='Report',
-        description='Stores the Report as String',
-        default=''
     )
 
 
