@@ -1,8 +1,12 @@
-import csv
+from distutils import dir_util
 import bpy
+import csv
 import bmesh
 import os
 from mathutils import Vector
+from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
+from .operators.apply_scale import MTRX_OT_apply_scale
+from .utils.generate_report import generate_report
 
 bl_info = {
     "name": "Production Metrics",
@@ -19,95 +23,6 @@ bl_info = {
 
 
 v_unit_scale = Vector((1.0, 1.0, 1.0))
-
-
-def generate_report(method, ctx):
-    SETTINGS = bpy.context.scene.unit_settings
-    SYSTEM = SETTINGS.system
-    LENGTH = SETTINGS.length_unit
-    SCALE = SETTINGS.scale_length
-
-    F1 = bpy.utils.units.to_value(SYSTEM, 'LENGTH', '1') * SCALE
-    F2 = F1 * F1
-    F3 = F2 * F1
-
-    o = bpy.context.active_object
-
-    bm = bmesh.new()
-    bm.from_mesh(o.data)
-
-    area = sum(face.calc_area() for face in bm.faces)
-
-    if method == 'FULL':
-        volume = float(bm.calc_volume())
-    else:
-        volume = area * ctx.scene.metrics_wall_thickness
-
-    bm.free()
-
-    mass = float(ctx.scene.metrics_density) * volume
-
-    def format_length(x):
-        return bpy.utils.units.to_string('METRIC', 'LENGTH', x * F1, precision=4)
-
-    def format_area(x):
-        return bpy.utils.units.to_string('METRIC', 'AREA', x * F2, precision=4)
-
-    def format_volume(x):
-        return bpy.utils.units.to_string('METRIC', 'VOLUME', x * F3, precision=4)
-
-    def format_mass(x):
-        return bpy.utils.units.to_string('METRIC', 'MASS', x * F3, precision=4)
-
-    return [
-        f"Object: {o.name}",
-        f"Method: {method.title()}",
-        f"Wall Thickness: {format_length(ctx.scene.metrics_wall_thickness)}" if method == 'WALLED' else None,
-        f"Dimensions:",
-        f"    X: {format_length(o.dimensions.x)}",
-        f"    Y: {format_length(o.dimensions.y)}",
-        f"    Z: {format_length(o.dimensions.z)}",
-        f"Area: {format_area(area)}" if o.scale == v_unit_scale else None,
-        f"Volume: {format_volume(volume)}" if o.scale == v_unit_scale else None,
-        f"Weight: {format_mass(mass)}" if o.scale == v_unit_scale else None,
-    ]
-
-
-class MTRX_OT_setup_unit_system(bpy.types.Operator):
-    """Helps setup Blender for working in Millimeters"""
-    bl_idname = "setup.change_unit_to_millimeters"
-    bl_label = "Setup Unit to MM"
-
-    def execute(self, context):
-        context.scene.unit_settings.length_unit = 'MILLIMETERS'
-        context.scene.unit_settings.scale_length = 0.001
-        for a in context.screen.areas:
-            if a.type == 'VIEW_3D':
-                context.space_data.overlay.grid_scale = 0.001
-                context.space_data.clip_start = 1
-                context.space_data.clip_end = 10_000
-
-        return {'FINISHED'}
-
-
-class MTRX_OT_apply_scale_operator(bpy.types.Operator):
-    """Apply scale in order to calculate accurate surface area and volume"""
-    bl_idname = "metrics.apply_scale"
-    bl_label = "Apply object scale"
-    bl_description = "Please apply Scale in order to get area an volume metrics"
-
-    @classmethod
-    def poll(self, context):
-        return context.object.scale != Vector((1, 1, 1))
-
-    def execute(self, context):
-        bpy.ops.object.transform_apply(location=False,
-                                       rotation=False,
-                                       scale=True,
-                                       properties=True,
-                                       isolate_users=False)
-        self.report({'INFO'}, f"Metrics: Object scale has been applied")
-        return {'FINISHED'}
 
 
 class MTRX_OT_copy_operator(bpy.types.Operator):
@@ -140,11 +55,12 @@ class MTRX_PT_sidebar(bpy.types.Panel):
 
         return len(context.selectable_objects)
 
-    def draw(self, context):
-        # col = self.layout.column(align=True)
+    def execute(self, context):
+        pass
 
+    def draw(self, context):
         col = self.layout.column(align=True)
-        col.operator("setup.change_unit_to_millimeters", icon="FIXED_SIZE")
+        col.operator("metrics.setup_mm", icon="FIXED_SIZE")
         col.separator()
         col.prop(context.scene, "metrics_production_method")
         col.separator()
@@ -154,18 +70,17 @@ class MTRX_PT_sidebar(bpy.types.Panel):
             col = self.layout.column(align=True)
             col.prop(context.scene, "metrics_wall_thickness")
 
-        box = self.layout.box()
-
         report = generate_report(
             context.scene.metrics_production_method, context)
 
+        box = self.layout.box()
         col = box.column(align=True)
         [col.label(text=line) for line in report if line]
 
         col = self.layout.column(align=False)
 
-        col.operator(MTRX_OT_apply_scale_operator.bl_idname,
-                     text=MTRX_OT_apply_scale_operator.bl_label,
+        col.operator(MTRX_OT_apply_scale.bl_idname,
+                     text=MTRX_OT_apply_scale.bl_label,
                      icon='CON_SIZELIMIT')
 
         col.operator(MTRX_OT_copy_operator.bl_idname,
@@ -173,9 +88,9 @@ class MTRX_PT_sidebar(bpy.types.Panel):
                      icon='COPYDOWN')
 
 
-classes = [MTRX_OT_setup_unit_system,
+classes = [MTRX_OT_set_units_to_mm,
            MTRX_OT_copy_operator,
-           MTRX_OT_apply_scale_operator,
+           MTRX_OT_apply_scale,
            MTRX_PT_sidebar, ]
 
 
@@ -220,6 +135,12 @@ def register():
         soft_max=6,
         min=0,
         max=30
+    )
+
+    bpy.types.Scene.metrics_report = bpy.props.StringProperty(
+        name='Report',
+        description='Stores the Report as String',
+        default=''
     )
 
 
