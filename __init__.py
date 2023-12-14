@@ -5,6 +5,7 @@ from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .panels.sidebar import MTRX_PT_sidebar
 from .utils.generate_material_enum_items import generate_material_enum_items
 
+
 bl_info = {
     "name": "Production Metrics",
     "description": "Find object metrics relevant for production",
