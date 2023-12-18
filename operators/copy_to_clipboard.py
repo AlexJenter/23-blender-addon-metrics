@@ -14,10 +14,7 @@ class MTRX_OT_copy_to_clipboard(bpy.types.Operator):
         return context.mode == "OBJECT"
 
     def execute(self: bpy.types.Operator, context: bpy.types.Context) -> operator.executeReturn:
-        report: list[str] = generate_report(
-            context.scene.metrics_production_method, context)
-
-        bpy.context.window_manager.clipboard = "\n".join(filter(None, report))
+        bpy.context.window_manager.clipboard = context.scene.metrics_report
 
         self.report({'INFO'}, f"Metrics: Report has been copied to clipboard")
         return {'FINISHED'}

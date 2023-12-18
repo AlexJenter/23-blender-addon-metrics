@@ -37,7 +37,7 @@ class MTRX_PT_sidebar(bpy.types.Panel):
         col = box.column(align=True)
     
 
-        [col.label(text=line) for line in context.scene.metrics_report if line]
+        [col.label(text=line) for line in context.scene.metrics_report.splitlines()]
 
         col = self.layout.column(align=False)
         col.operator(MTRX_OT_copy_to_clipboard.bl_idname,

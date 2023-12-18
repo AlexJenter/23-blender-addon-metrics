@@ -38,7 +38,7 @@ def generate_report(method: bpy.types.EnumProperty, context: bpy.types.Context):
     def format_mass(x: float) -> str:
         return bpy.utils.units.to_string('METRIC', 'MASS', x * F3, precision=4)
 
-    return [
+    report = [
         f"Object: {o.name}",
         f"Method: {method.title()}",
         f"Wall Thickness: {format_length(context.scene.metrics_wall_thickness)}" if method == 'WALLED' else None,
@@ -50,3 +50,5 @@ def generate_report(method: bpy.types.EnumProperty, context: bpy.types.Context):
         f"Volume: {format_volume(volume)}",
         f"Weight: {format_mass(mass)}",
     ]
+    
+    return "\n".join([l for l in report if l])
