@@ -14,5 +14,5 @@ class MTRX_OT_set_units_to_mm(bpy.types.Operator):
             if area.type == 'VIEW_3D':
                 context.space_data.overlay.grid_scale = 0.001
                 context.space_data.clip_start = 1
-                context.space_data.clip_end = 10_000
+                context.space_data.clip_end = 100_000
         return {'FINISHED'}

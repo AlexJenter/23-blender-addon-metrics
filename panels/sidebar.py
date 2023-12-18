@@ -1,6 +1,7 @@
 import bpy
 
 from ..operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
+from ..operators.generate_report import MTRX_OT_generate_report
 from ..utils.generate_report import generate_report
 
 
@@ -29,13 +30,14 @@ class MTRX_PT_sidebar(bpy.types.Panel):
         if (context.scene.metrics_production_method == 'WALLED'):
             col = self.layout.column(align=True)
             col.prop(context.scene, "metrics_wall_thickness")
+        
+        col.operator(MTRX_OT_generate_report.bl_idname)
 
         box = self.layout.box()
         col = box.column(align=True)
-        report = generate_report(
-            context.scene.metrics_production_method, context)
+    
 
-        [col.label(text=line) for line in report if line]
+        [col.label(text=line) for line in context.scene.metrics_report if line]
 
         col = self.layout.column(align=False)
         col.operator(MTRX_OT_copy_to_clipboard.bl_idname,

@@ -5,7 +5,9 @@ from contextlib import contextmanager
 
 @contextmanager
 def bmesh_from_object_transformed(object: bpy.types.Object):
-    """Creates a new bmesh from a blender object, applies its world matrix and subsequently frees the memory"""
+    """
+    Creates a new bmesh from a blender object, applies its world matrix and subsequently frees the memory
+    """
     bm: bmesh.types.BMesh = bmesh.new()
     try:
         bm.from_mesh(object.data)
@@ -14,3 +16,4 @@ def bmesh_from_object_transformed(object: bpy.types.Object):
         yield bm
     finally:
         bm.free()
+
