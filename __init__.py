@@ -3,7 +3,6 @@ import os
 from .operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from .operators.set_units_to_mm import MTRX_OT_set_units_to_mm
 from .operators.generate_report import MTRX_OT_generate_report
-from .operators.open_browser import MTRX_OT_open_browser
 from .panels.sidebar import MTRX_PT_sidebar
 from .utils.generate_material_enum_items import generate_material_enum_items
 
@@ -24,7 +23,6 @@ bl_info = {
 
 
 classes = [
-    MTRX_OT_open_browser,
     MTRX_OT_copy_to_clipboard,
     MTRX_OT_generate_report,
     MTRX_OT_set_units_to_mm,

@@ -33,6 +33,7 @@ class MTRX_PT_sidebar(bpy.types.Panel):
             col = self.layout.column(align=True)
             col.prop(context.scene, "metrics_wall_thickness")
 
+        col.separator()
         col.operator(MTRX_OT_generate_report.bl_idname)
 
         box = self.layout.box()
