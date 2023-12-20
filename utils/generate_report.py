@@ -1,3 +1,4 @@
+from contextvars import Context
 import bpy
 from mathutils import Vector
 from .bmesh_from_object_transformed import bmesh_from_object_transformed
@@ -5,7 +6,7 @@ from .bmesh_from_object_transformed import bmesh_from_object_transformed
 v_unit_scale = Vector((1.0, 1.0, 1.0))
 
 
-def generate_report(method: bpy.types.EnumProperty, context: bpy.types.Context):
+def generate_report(method: bpy.types.EnumProperty, context: 'Context'):
     SETTINGS: bpy.types.UnitSettings = bpy.context.scene.unit_settings
     SYSTEM: str | int = SETTINGS.system
     LENGTH: str | int = SETTINGS.length_unit

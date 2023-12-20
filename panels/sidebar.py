@@ -15,9 +15,9 @@ class MTRX_PT_sidebar(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context: bpy.types.Context) -> bool:
-        in_object_mode: bool = bpy.context.object.mode == 'OBJECT'
+        in_object_mode: bool = bpy.context.object and bpy.context.object and bpy.context.object.mode == 'OBJECT'
         active_object: bool = context.active_object is not None
-        return active_object and in_object_mode
+        return in_object_mode and active_object
 
     def draw(self, context: bpy.types.Context):
         col = self.layout.column(align=True)
