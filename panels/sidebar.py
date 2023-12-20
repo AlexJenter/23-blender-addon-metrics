@@ -1,8 +1,9 @@
 import bpy
 
+
 from ..operators.copy_to_clipboard import MTRX_OT_copy_to_clipboard
 from ..operators.generate_report import MTRX_OT_generate_report
-from ..utils.generate_report import generate_report
+from ..utils.path_or import path_or
 
 
 class MTRX_PT_sidebar(bpy.types.Panel):
@@ -15,7 +16,8 @@ class MTRX_PT_sidebar(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context: bpy.types.Context) -> bool:
-        in_object_mode: bool = bpy.context.object and bpy.context.object and bpy.context.object.mode == 'OBJECT'
+        in_object_mode: bool = path_or(
+            bpy, 'context.object.mode', None) == 'OBJECT'
         active_object: bool = context.active_object is not None
         return in_object_mode and active_object
 
