@@ -30,14 +30,14 @@ class MTRX_PT_sidebar(bpy.types.Panel):
         if (context.scene.metrics_production_method == 'WALLED'):
             col = self.layout.column(align=True)
             col.prop(context.scene, "metrics_wall_thickness")
-        
+
         col.operator(MTRX_OT_generate_report.bl_idname)
 
         box = self.layout.box()
         col = box.column(align=True)
-    
 
-        [col.label(text=line) for line in context.scene.metrics_report.splitlines()]
+        [col.label(text=line)
+         for line in context.scene.metrics_report.splitlines()]
 
         col = self.layout.column(align=False)
         col.operator(MTRX_OT_copy_to_clipboard.bl_idname,
